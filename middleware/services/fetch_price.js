@@ -40,7 +40,7 @@ const fetchPrice = async () => {
 };
 
 // Schedule the cron job to run every minute (for testing)
-cron.schedule('* * * * *', fetchPrice, {
+cron.schedule('0 12 * * *', fetchPrice, {
     scheduled: true,
     timezone: "America/New_York"
 });
