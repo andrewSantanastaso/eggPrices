@@ -2,29 +2,32 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const priceRoutes = require('./routes/priceRoutes');
 const fetchPrice = require('./middleware/services/fetch_price');
 const { getAccessToken, getRefreshToken } = require('./middleware/services/tokenService');
-
+const pricesRouter = require('./controllers/prices');
 
 
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-
-// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.log(err));
+
+mongoose.connection.once('connected', () => {
+    console.log('Connected to MongoDB')
+})
+mongoose.connection.on('error', () => {
+    console.error('Error connecting to mongoDB')
+})
+app.use(cors())
+
+app.use(express.json())
 
 
 // Routes
 
 
 
-app.use('/api', priceRoutes);
+app.use('/api', pricesRouter);
 
 app.listen(process.env.PORT, () => {
     console.log('Server is running')
