@@ -26,7 +26,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use('/api', priceRoutes);
 
-app.listen(process.env.PORT || 3000, () => {
+app.listen(process.env.PORT, () => {
     console.log('Server is running')
 })
 
