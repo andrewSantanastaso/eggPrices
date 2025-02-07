@@ -1,18 +1,19 @@
 const fetch_price = require('../middleware/services/fetch_price');
+const express = require('express');
 const Price = require('../models/price');
-const router = require('express').Router();
+const router = express.Router();
 
-router.get('/api', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        const foundEntries = await Price.find().sort({ date: -1 }).
-            console.log(foundEntries);
+        const foundEntries = await Price.find().sort({ date: -1 })
+        console.log(foundEntries);
 
         res.status(200).json(foundEntries);
 
 
     } catch (error) {
-        console.error('Error in getEggPrices:', error.message);
-        res.status(500).json({ message: 'Internal Server Error' });
+
+        res.status(400).json({ error: error.message });
     }
 })
 

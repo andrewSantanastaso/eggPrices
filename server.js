@@ -23,11 +23,11 @@ app.use(cors())
 app.use(express.json())
 
 
-// Routes
 
 
 
-app.use('/api', pricesRouter);
+
+app.use('/', pricesRouter);
 
 app.listen(process.env.PORT, () => {
     console.log('Server is running')
