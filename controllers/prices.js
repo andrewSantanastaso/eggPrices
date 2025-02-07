@@ -34,8 +34,10 @@ const Price = require('../models/price');
 // };
 exports.getEggPrices = async (req, res) => {
     try {
-        const foundPrice = await Price.find().sort({ date: -1 });
-        res.status(200).json(foundPrice);
+        const foundEntries = await Price.find().sort({ date: -1 });
+        console.log(foundEntries);
+
+        res.status(200).json(foundEntries);
 
 
     } catch (error) {

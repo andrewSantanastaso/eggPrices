@@ -9,6 +9,13 @@ const priceSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    description: {
+        type: String
+    },
+    size: {
+        type: String
+    }
+
 })
 
 const Price = mongoose.model('Price', priceSchema);

@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const priceRoutes = require('./routes/priceRoutes');
 const fetchPrice = require('./middleware/services/fetch_price');
+const { getAccessToken, getRefreshToken } = require('./middleware/services/tokenService');
+
 
 
 
@@ -27,4 +29,6 @@ app.use('/api', priceRoutes);
 app.listen(process.env.PORT || 3000, () => {
     console.log('Server is running')
 })
+
+
 
