@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         const foundEntries = await Price.find().sort({ date: -1 })
-        console.log(foundEntries);
+
 
         res.status(200).json(foundEntries);
 

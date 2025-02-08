@@ -16,37 +16,38 @@ const getValidToken = async () => {
 const fetchPrice = async (req, res, next) => {
     let token = await getValidToken();
 
-    console.log('bearerToken:', token);
+\
 
-    try {
-        res = await fetch(process.env.BASE_URL, {
-            method: 'GET',
-            headers: {
-                // 'Authorization': `Bearer '${token}'`,
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`,
+try {
+    res = await fetch(process.env.BASE_URL, {
+        method: 'GET',
+        headers: {
 
-            }
-        });
-        let data = await res.json();
-        console.log('data:', data);
-        if (!data) {
-            return { error: 'Failed to fetch prices' };
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+
         }
-        // Save prices to the database
-        const newEntry = new Price({
-            description: data.data[0].description,
-            size: data.data[0].items[0].size,
-            date: new Date(),
-            price: data.data[0].items[0].price.regular
-        });
-        await newEntry.save();
-        console.log('Price saved to database:', newEntry);
+    });
+    let data = await res.json();
 
-    } catch (error) {
-        console.error('Error fetching prices:', error);
+    if (!data) {
         return { error: 'Failed to fetch prices' };
     }
+    // Save prices to the database
+    const newEntry = new Price({
+        description: data.data[0].description,
+        size: data.data[0].items[0].size,
+        date: new Date(),
+        price: data.data[0].items[0].price.regular
+    });
+    await newEntry.save();
+    console.log('Price fetched and saved')
+
+
+} catch (error) {
+    console.error('Error fetching prices:', error);
+    return { error: 'Failed to fetch prices' };
+}
 }
 
 // Schedule the cron job to run every day at Noon
