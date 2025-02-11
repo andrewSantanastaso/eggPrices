@@ -1,65 +1,97 @@
 require('dotenv').config();
-
 const Price = require('../../models/price');
+const AveragePrice = require('../../models/averagePrice');
 const cron = require('node-cron');
-const { getBearerToken, serviceToken } = require('./tokenService');
-const { accessToken } = require('../../config');
-const { get } = require('mongoose');
-
-let bearerToken = process.env.BEARER_TOKEN;
+const { serviceToken } = require('./tokenService');
+const { fetchLocations } = require('./locationsService');
 
 const getValidToken = async () => {
-    const token = await serviceToken();
-    return token;
-}
+    return await serviceToken();
+};
 
-const fetchPrice = async (req, res, next) => {
-    let token = await getValidToken();
-
-
-
+const fetchPrice = async () => {
     try {
-        res = await fetch(process.env.BASE_URL, {
-            method: 'GET',
-            headers: {
+        let token = await getValidToken();
+        let locations = await fetchLocations(); // ✅ Ensure locations is an array
+        let locationLength = locations.length;
+        let todaysTotal = 0;
+        let saveOperations = [];
 
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`,
+        for (const locationId of locations) {
+            try {
+                console.log('Fetching price for Location ID:', locationId);
 
+                const response = await fetch(`https://api.kroger.com/v1/products?filter.term=eggs&filter.locationId=${locationId}&filter.productId=0001111060903`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error(`API request failed for location ${locationId}: ${response.status}`);
+                    locationLength--; // Exclude failed location from average
+                    continue;
+                }
+
+                let data = await response.json();
+                if (!data?.data?.length) {
+                    console.warn(`No valid data for location ${locationId}`);
+                    locationLength--; // Exclude from average
+                    continue;
+                }
+
+                const price = parseFloat(data.data[0]?.items?.[0]?.price?.regular);
+                if (isNaN(price) || price === 0) {
+                    console.warn(`Invalid price for location ${locationId}, skipping...`);
+                    locationLength--;
+                    continue;
+                }
+
+                const newEntry = new Price({
+                    description: data.data[0]?.description || 'Unknown',
+                    size: data.data[0]?.items?.[0]?.size || 'Unknown',
+                    date: new Date(),
+                    price,
+                    locationId,
+                });
+
+                saveOperations.push(newEntry.save()); // ✅ Save operation added
+                todaysTotal += price;
+            } catch (error) {
+                console.error(`Error fetching prices for location ${locationId}:`, error);
+                locationLength--; // Exclude failed location
             }
-        });
-        let data = await res.json();
-
-        if (!data) {
-            return { error: 'Failed to fetch prices' };
         }
-        // Save prices to the database
-        const newEntry = new Price({
-            description: data.data[0].description,
-            size: data.data[0].items[0].size,
-            date: new Date(),
-            price: data.data[0].items[0].price.regular
-        });
-        await newEntry.save();
-        console.log('Price fetched and saved')
 
+        // ✅ Wait for all saves to complete
+        await Promise.all(saveOperations);
 
-    } catch (error) {
-        console.error('Error fetching prices:', error);
-        return { error: 'Failed to fetch prices' };
+        // ✅ Compute and store the daily average
+        if (locationLength > 0) {
+            const dailyAverage = parseFloat((todaysTotal / locationLength).toFixed(2)) || 0;
+            console.log(`Today's Average Price: ${dailyAverage}`);
+
+            const newAveragePrice = new AveragePrice({
+                date: new Date(),
+                price: dailyAverage,
+            });
+
+            await newAveragePrice.save();
+            console.log('Saved daily average price:', newAveragePrice);
+        } else {
+            console.warn('No valid prices recorded today, skipping daily average calculation.');
+        }
+    } catch (criticalError) {
+        console.error('Critical error in fetchPrice:', criticalError);
     }
-}
+};
 
-// Schedule the cron job to run every day at Noon
-cron.schedule('0 12 * * *', fetchPrice, {
+
+cron.schedule('* * * * *', fetchPrice, {
     scheduled: true,
     timezone: "America/New_York"
 });
-
-// for testing
-// cron.schedule('* * * * *', fetchPrice, {
-//     scheduled: true,
-//     timezone: "America/New_York"
-// });
 
 module.exports = fetchPrice;

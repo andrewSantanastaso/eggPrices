@@ -5,10 +5,12 @@ const cors = require('cors');
 const fetchPrice = require('./middleware/services/fetch_price');
 const { getAccessToken, getRefreshToken } = require('./middleware/services/tokenService');
 const pricesRouter = require('./controllers/prices');
+const { fetchLocations } = require('./middleware/services/locationsService');
 
 
 
 const app = express();
+
 
 mongoose.connect(process.env.MONGO_URI)
 
@@ -21,6 +23,8 @@ mongoose.connection.on('error', () => {
 app.use(cors())
 
 app.use(express.json())
+
+
 
 
 

@@ -14,6 +14,10 @@ const priceSchema = new mongoose.Schema({
     },
     size: {
         type: String
+    },
+    location: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Location'
     }
 
 })
