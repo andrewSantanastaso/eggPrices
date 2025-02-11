@@ -19,7 +19,7 @@ const fetchPrice = async () => {
 
         for (const locationId of locations) {
             try {
-                console.log('Fetching price for Location ID:', locationId);
+                console.log(`Fetching ${locations.indexOf(locationId) + 1} of ${locationLength}...`);
 
                 const response = await fetch(`https://api.kroger.com/v1/products?filter.term=eggs&filter.locationId=${locationId}&filter.productId=0001111060903`, {
                     method: 'GET',
@@ -75,7 +75,7 @@ const fetchPrice = async () => {
 
             const newAveragePrice = new AveragePrice({
                 date: new Date(),
-                price: dailyAverage,
+                averagePrice: dailyAverage,
             });
 
             await newAveragePrice.save();
@@ -89,7 +89,7 @@ const fetchPrice = async () => {
 };
 
 
-cron.schedule('* * * * *', fetchPrice, {
+cron.schedule('* 12 * * *', fetchPrice, {
     scheduled: true,
     timezone: "America/New_York"
 });
