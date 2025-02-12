@@ -13,7 +13,7 @@ const fetchPrice = async () => {
     try {
         let token = await getValidToken();
         let locations = await fetchLocations(); // ✅ Ensure locations is an array
-        let locationLength = locations.length;
+        let locationLength = locations?.length;
         let todaysTotal = 0;
         let saveOperations = [];
 
