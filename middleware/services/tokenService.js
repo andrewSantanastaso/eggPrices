@@ -18,7 +18,7 @@ const serviceToken = async () => {
         }),
     });
     const tokenJson = await token.json();
-    console.log(tokenJson);
+
     return tokenJson.access_token;
 }
 
