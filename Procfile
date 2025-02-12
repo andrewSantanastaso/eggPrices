@@ -1,1 +1,1 @@
-worker: node path/to/fetch_prices.js
+worker: node path/to/fetch_price.js
