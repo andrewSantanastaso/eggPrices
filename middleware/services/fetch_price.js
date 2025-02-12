@@ -89,9 +89,11 @@ const fetchPrice = async () => {
 };
 
 
-cron.schedule('* 12 * * *', fetchPrice, {
-    scheduled: true,
-    timezone: "America/New_York"
-});
+// cron.schedule('* 12 * * *', fetchPrice, {
+//     scheduled: true,
+//     timezone: "America/New_York"
+// });
 
+
+fetchPrice();
 module.exports = fetchPrice;
